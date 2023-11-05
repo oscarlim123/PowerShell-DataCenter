@@ -1,4 +1,20 @@
 ﻿<# 
+.SYNOPSIS
+	
+.DESCRIPTION
+	This PowerShell script checks ....
+.PARAMETER accion
+	
+.EXAMPLE
+	PS> ./check-subnet-mask.ps1 255.255.255.0
+	✔️ subnet mask 255.255.255.0 is valid
+.LINK
+	https://github.com/fleschutz/PowerShell EJEMPLO
+.NOTES
+	Author: 
+
+
+
  El equipo remoto debe permitir conexiones remotas a través de WinRM. 
  El firewall en el equipo remoto debe permitir las conexiones a través del puerto utilizado por WinRM 
  (normalmente, el puerto 5985 para HTTP y 5986 para HTTPS).
