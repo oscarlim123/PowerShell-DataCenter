@@ -1,61 +1,54 @@
 ﻿<# 
- El equipo remoto debe permitir conexiones remotas a través de WinRM. 
- El firewall en el equipo remoto debe permitir las conexiones a través del puerto utilizado por WinRM 
- (normalmente, el puerto 5985 para HTTP y 5986 para HTTPS).
-
- Agregar en el cliente los equipos remotos a los host de confianza. Ejecutar en el PowerShell como Administrador:
- Set-Item WSMan:\localhost\Client\TrustedHosts -Value "10.200.1.*" -Force
-
- Si hay problema con la conexión habilitar WinRM en el equipo remoto:
- Enable-PSRemoting -Force
- Get-Service WinRM
- Start-Service WinRM
- Restart-Service WinRM
+.SYNOPSIS
+	Hace una conexión a un rango de IPs y cambia la zona horaria
+.DESCRIPTION
+.PARAMETER UserName
+    Nombre de usuario con permisos de administración para hacer la conexión
+.EXAMPLE
+	PS> ./Get-TimeZone.ps1 -u Administrator
+.LINK
+	https://github.com/oscarlim123/PowerShell-DataCenter
+.NOTES
+	Author: oscarlim@protonmail.com
 #>
-# $TimeZone = [System.TimeZoneInfo]::FindSystemTimeZoneById("Cuba Standard Time")
-# tzutil /s $TimeZone.Id
+
+param(
+    [Parameter(Mandatory=$true, HelpMessage="Nombre de usuario.")]
+    [Alias("-u")]
+    [ValidateNotNullOrEmpty()]
+    [string]$UserName
+)
 
 . .\Funciones.ps1
-#region Pedido de datos
-    Write-Host " "
 
+#region Pedido de datos
+    $securePasswd = Read-Host -Prompt "Contraseña" -AsSecureString
     $IPInicial = Read-Host -Prompt "IP inicial "
     $IPFinal = Read-Host -Prompt "IP final "
-    Write-Host "Usuario Administrator" 
-    $securePasswd = Read-Host -Prompt "Contraseña" -AsSecureString
- 
     Write-Host " "
 #endregion
 
 #region Preparacion de variables
     #region Comprobación de IP
-        $ipRegex = "^(\d{1,3}\.){3}\d{1,3}$"
-        if (($IPInicial -match $ipRegex) -and ($IPFinal -match $ipRegex)) {
-            # Convertir las direcciones IP en formato de objeto [System.Net.IPAddress]
-            $inicio = [System.Net.IPAddress]::Parse($IPInicial)
-            $fin = [System.Net.IPAddress]::Parse($IPFinal)
-        
-            if ($inicio.Address -lt $fin.Address) {
-                Write-Host "Validando direcciones IP.....OK"
-                Write-Host "Estableciendo conexiones..."
-            }
-            else {
-                Write-Host "ERROR: $IPInicial debe ser menor que $IPFinal"
-                Exit
-            }
+        try {
+            $Global:inicio = [System.Net.IPAddress]::Parse($IPInicial)
+            $Global:fin = [System.Net.IPAddress]::Parse($IPFinal)
+            $chkIP = CheckIP $IPInicial $IPFinal
+
+            if ($chkIP -eq $false){
+                Throw "Error"
+            } 
         }
-        else {
-            Write-Host "ERROR: Una o ambas direcciones IP no son válidas"
-            Exit
+        catch {
+            Write-Error "Hay errores en las direcciones IP proporcionadas $($_.Exception.Message)" -ErrorAction Stop
         }
     #endregion
 
-    $UserName = "Administrator"
     $Credential = New-Object PSCredential -ArgumentList ($UserName, $securePasswd)
     $count = 0;
     # Crear una lista vacía para el listado de zonas horarias
-    $ZonaHorariaCambiada = New-Object System.Collections.Generic.List[string]
-    $ZonaHorariaCambiada.Add("Hosts a los que se les cambió la Zona Horaria")
+    $ZonasHorariasCambiadas = New-Object System.Collections.Generic.List[string]
+    $ZonasHorariasCambiadas.Add("Hosts a los que se les cambió la Zona Horaria")
     $newZonaHoraria = "Cuba Standard Time"
     $currentIP = $inicio
 #endregion
@@ -72,20 +65,18 @@ while ($currentIP.Address -le $fin.Address) {
 
                 foreach ($timeZone in $TimeZones) {
                     if ($timeZone.Id -eq $newZonaHoraria) {
-                        Write-Host "$HostName ($($Session.ComputerName)) tiene la zona horaria 'Cuba Standard Time' existe."
+                        Write-Host "$HostName ($($Session.ComputerName)) tiene la zona horaria '$newZonaHoraria' existe."
+                        
+                        Invoke-Command -Session $Session -ScriptBlock {                       
+                        Param($x) tzutil /s $x
+                        } -ArgumentList $newZonaHoraria
 
-                        Invoke-Command -Session $Session -ScriptBlock {
-                        $var = "Cuba Standard Time"
-                        tzutil /s $var
-                        }
-
-                        $ZonaHorariaCambiada.Add("Zona horaria cambiada $HostName ($($Session.ComputerName)) : $($TimeZone)")
+                        $ZonasHorariasCambiadas.Add("Zona horaria cambiada $HostName ($($Session.ComputerName)) : $($TimeZone)")
                         Write-Host "Zona Horaria cambiada"
                         break
                     }
                 }               
             #endregion
-
             Remove-PSSession -Session $Session
             $count++;
         } else {
@@ -101,5 +92,5 @@ while ($currentIP.Address -le $fin.Address) {
     $currentIP = [System.Net.IPAddress]::new($bytes)
 }
 
-GuardarEnArchivo $ZonaHorariaCambiada "SetListadoZonasHorarias.txt"
-Write-Host "Cantidad de hosts chequeados: $count";
+GuardarEnArchivo $ZonasHorariasCambiadas "SetListadoZonasHorarias.txt"
+Write-Host "Cantidad de hosts chequeados: $count"
