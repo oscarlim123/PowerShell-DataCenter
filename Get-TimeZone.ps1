@@ -3,9 +3,11 @@
 	Hace una conexión a un rango de IPs y toma la zona horaria. La va mostrando y crea un fichero
     con el resultado
 .DESCRIPTION
-	
+
+.PARAMETER UserName
+    Nombre de usuario con permisos de administración para hacer la conexión
 .EXAMPLE
-	PS> ./Get-TimeZone.ps1
+	PS> ./Get-TimeZone.ps1 -u Administrator
 .LINK
 	https://github.com/oscarlim123/PowerShell-DataCenter
 .NOTES
@@ -67,11 +69,11 @@ while ($currentIP.Address -le $fin.Address) {
                     $env:COMPUTERNAME
                 }
         
-                $resultado = "Zona horaria de $HostName ($($Session.ComputerName)) : $($TimeZone)"
-                Write-Host $resultado
+                $showTimeZone = "Zona horaria de $HostName ($($Session.ComputerName)) : $($TimeZone)"
+                Write-Host $showTimeZone
         
                 # Matriz con los resultados
-                $timeZoneNames.Add($resultado)
+                $timeZoneNames.Add($showTimeZone)
             #endregion
 
             Remove-PSSession -Session $Session
