@@ -1,2 +1,2 @@
 # PowerShell-DataCenter
- Scripts para automatización de tareas en eun DataCenter. Proyectos personales.
+ Scripts para automatización de tareas en un DataCenter. Proyectos personales.
