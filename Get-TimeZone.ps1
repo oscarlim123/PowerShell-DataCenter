@@ -1,9 +1,7 @@
 ﻿<# 
 .SYNOPSIS
-	Hace una conexión a un rango de IPs y toma la zona horaria. La va mostrando y crea un fichero
+	Hace una conexión a un rango de IPs y toma la zona horaria, la va mostrando y crea un fichero
     con el resultado
-.DESCRIPTION
-
 .PARAMETER UserName
     Nombre de usuario con permisos de administración para hacer la conexión
 .EXAMPLE
@@ -12,7 +10,6 @@
 	https://github.com/oscarlim123/PowerShell-DataCenter
 .NOTES
 	Author: oscarlim@protonmail.com
-
 #>
 
 param(
