@@ -1,4 +1,3 @@
-
 <# 
 .SYNOPSIS
 	Muestra la fecha y hora de las estaciones de un AD
@@ -6,12 +5,11 @@
 .EXAMPLE
 	PS> ./Get-TimeAD.ps1
 .LINK
-
+    https://github.com/oscarlim123/PowerShell-DataCenter
 .NOTES
 
 #>
 
-# Lista de nombres de computadoras del dominio
 $computerADList = Get-ADComputer -Filter * | Select-Object -ExpandProperty Name
 
 $archivoSalida = "HoraComputadorasAD.txt"
