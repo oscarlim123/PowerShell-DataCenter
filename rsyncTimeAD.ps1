@@ -1,6 +1,6 @@
 <# 
 .SYNOPSIS
-	Forzar la sincronización con el servidor de dominio
+	Forzar la sincronización de las estaciones de un Directorio Activo con el servidor de dominio
 .EXAMPLE
 	PS> ./rsyncTimeAD.ps1
 .LINK
@@ -26,7 +26,6 @@ foreach ($computer in $computerADList) {
                 $rsync = "Sincronizacion de $computer"
                 Write-Host $rsync
         
-                # Matriz con los resultados
                 $timexComputadoras.Add($rsync)
             #endregion
             Remove-PSSession -Session $Session
