@@ -69,7 +69,7 @@ while ($currentIP.Address -le $fin.Address) {
                         
                         Invoke-Command -Session $Session -ScriptBlock {                       
                         Param($x) tzutil /s $x
-                        } -ArgumentList $newZonaHoraria
+                        } -ArgumentList $newZonaHoraria -AsJob
 
                         $ZonasHorariasCambiadas.Add("Zona horaria cambiada $HostName ($($Session.ComputerName)) : $($TimeZone)")
                         Write-Host "Zona Horaria cambiada"
