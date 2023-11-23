@@ -1,7 +1,15 @@
 #Clear-Host
 
-
-function findDuplicatedValues {
+<# 
+.SYNOPSIS
+This function takes an array of IP and MAC addresses, searches for duplicates, 
+and returns an object that contains the duplicated IP and MAC addresses.
+.PARAMETER arrayTablaARP
+Array containning arp table
+.EXAMPLE
+$duplicatedValues = Find-DuplicatedValues -arrayTablaARP $arpTable
+#>
+function Find-DuplicatedValues {
     param (
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
@@ -49,7 +57,18 @@ function findDuplicatedValues {
 
 <#-------------------------------------------------------------#>
 
-function getMacList {
+<#
+.SYNOPSIS
+The script gets the list of MAC addresses for physical interfaces on the system. 
+It uses the PowerShell cmdlets Get-NetAdapter and Get-NetIPAddress to get the IP addresses for each interface 
+and then uses the Get-NetNeighbor cmdlet to get the IP addresses and link layer (MAC) addresses of neighbors on the network. 
+The script creates an ARP table that stores the tuples of neighbor IP and MAC addresses and also generates 
+an output message that shows the information for each interface and its neighbors. 
+Finally, the output message is saved to a specified file and the ARP table is returned.
+.EXAMPLE
+$arpTable = Get-MacList -outputFile $macListFile
+#>
+function Get-MacList {
     param (
         [string]$outputFile
     )
@@ -76,7 +95,6 @@ function getMacList {
                         $outputMessage += "$newTupla`n"
                     }  
                     $outputMessage += "`n"
-                    #$outputMessage | Out-File -FilePath $outputFile -Force
                 }
                 else {
                     Write-Error "No se ha podido obtener la lista"
@@ -91,27 +109,37 @@ function getMacList {
 <#-------------------------------------------------------------#>
 
 
+# Specify the path to the file
+$macListFile = "MACxInterfaces.txt"
+
 try {
-    $MACListFich = "MACxInterfaces.txt"
-
     . .\Funciones.ps1
+}
+catch {
+    Write-Error "Error processing data: $($_.Exception.Message)" -ErrorAction Stop
+}
 
-    $tablaARP = getMacList $MACListFich
-    $duplicatedValues = findDuplicatedValues $tablaARP
-    Write-Output "Entradas duplicadas en la tabla ARP:"
-    Write-Output ""
+$arpTable = Get-MacList -outputFile $macListFile
+$duplicatedValues = Find-DuplicatedValues -arrayTablaARP $arpTable
+
+Write-Output "Duplicates entries in the ARP table:"
+Write-Output ""
+
+try {
+    # Iterate through the duplicated entries
     foreach ($key in $duplicatedValues.Keys) {
         $duplicatedValue = $duplicatedValues[$key]
     
         Write-Output "$key :"
     
+        # Iterate through the items in each duplicated entry
         foreach ($item in $duplicatedValue) {
-            Write-Host " $($item.Ip)  $($item.Mac)"
+            Write-Output " $($item.Ip)  $($item.Mac)"
         }
     }   
-    Write-Output "Listado de la tabla ARP en el fichero $MACListFich"
+    Write-Output "ARP table listing saved to the file $macListFile"
     Write-Output ""
-}
-catch {
-    Write-Error "Errores al procesar los datos $($_.Exception.Message)" -ErrorAction Stop
+}   
+catch [System.Exception]{
+    Write-Error "Error processing data: $($_.Exception.Message)" -ErrorAction Stop
 }
