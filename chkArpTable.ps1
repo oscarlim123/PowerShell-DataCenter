@@ -119,9 +119,9 @@ catch {
     Write-Error "Error processing data: $($_.Exception.Message)" -ErrorAction Stop
 }
 
-$arpTable = Get-MacList -outputFile $macListFile
-$duplicatedValues = Find-DuplicatedValues -arrayTablaARP $arpTable
-
+#$arpTable = Get-MacList -outputFile $macListFile
+#$duplicatedValues = Find-DuplicatedValues -arrayTablaARP $arpTable
+$duplicatedValues = Get-MacList -outputFile $macListFile | Find-DuplicatedValues
 Write-Output "Duplicates entries in the ARP table:"
 Write-Output ""
 
