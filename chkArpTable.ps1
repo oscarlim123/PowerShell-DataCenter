@@ -16,6 +16,7 @@ function Find-DuplicatedValues {
         [Array]$arrayTablaARP
     )
   
+    $noMac = "00-00-00-00-00-00"
     # Error handling
     if ($null -eq $arrayTablaARP -or $arrayTablaARP.Count -eq 0) {
         throw "El parámetro 'arrayTablaARP' debe ser un arreglo no nulo y contener elementos."
@@ -33,14 +34,14 @@ function Find-DuplicatedValues {
             $mac = $fila[1]
 
             # Check if either IP or MAC address is already found and the MAC address is not "00-00-00-00-00-00"
-            if ($foundValues.ContainsKey($ip) -and $mac -ne "00-00-00-00-00-00") {
+            if ($foundValues.ContainsKey($ip) -and $mac -ne $noMac) {
                 $duplicatedValues.Ip += [PSCustomObject]@{
                     Ip = $ip
                     Mac = $mac
                 }
             }
 
-            if ($foundValues.ContainsKey($mac) -and $mac -ne "00-00-00-00-00-00") {
+            if ($foundValues.ContainsKey($mac) -and $mac -ne $noMac) {
                 $duplicatedValues.Mac += [PSCustomObject]@{
                     Ip = $ip
                     Mac = $mac
@@ -119,9 +120,12 @@ catch {
     Write-Error "Error processing data: $($_.Exception.Message)" -ErrorAction Stop
 }
 
-#$arpTable = Get-MacList -outputFile $macListFile
-#$duplicatedValues = Find-DuplicatedValues -arrayTablaARP $arpTable
-$duplicatedValues = Get-MacList -outputFile $macListFile | Find-DuplicatedValues
+$arpTable = Get-MacList -outputFile $macListFile
+$duplicatedValues = Find-DuplicatedValues -arrayTablaARP $arpTable
+
+$interfacesList = Get-NetAdapter -Physical | Select-Object -ExpandProperty Name
+$fakeIP = Get-NetNeighbor -InterfaceAlias $interfacesList[0] | Where-Object {$_.IPAddress -notmatch "^172\.23\.6\."}
+
 Write-Output "Duplicates entries in the ARP table:"
 Write-Output ""
 
@@ -139,6 +143,7 @@ try {
     }   
     Write-Output "ARP table listing saved to the file $macListFile"
     Write-Output ""
+    Write-Output $fakeIP
 }   
 catch [System.Exception]{
     Write-Error "Error processing data: $($_.Exception.Message)" -ErrorAction Stop
