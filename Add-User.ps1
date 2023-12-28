@@ -67,7 +67,6 @@ param(
 while ($currentIP.Address -le $fin.Address) {
     try {
         $Session = New-PSSession -ComputerName $currentIP -Credential $Credential
-
         if ($Session.State -eq 'Opened') {           
             #region ParteModificable
             $newusertoadd = Invoke-Command -Session $Session -ScriptBlock {
