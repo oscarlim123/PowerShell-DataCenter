@@ -69,7 +69,7 @@ while ($currentIP.Address -le $fin.Address) {
         $Session = New-PSSession -ComputerName $currentIP -Credential $Credential
         if ($Session.State -eq 'Opened') {           
             #region ParteModificable
-            $newusertoadd = Invoke-Command -Session $Session -ScriptBlock {
+            Invoke-Command -Session $Session -ScriptBlock {
                 param($x, $y) 
                 net user $x $y /add /expires:never #/passwordchg:no
                 wmic useraccount where "Name='$x'" set PasswordExpires=False
