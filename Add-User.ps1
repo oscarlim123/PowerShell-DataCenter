@@ -60,9 +60,7 @@ param(
     #endregion
 
     $Credential = New-Object PSCredential -ArgumentList ($userName, $securePasswd)
-    $count = 0;
-    # Crear una lista vacía para el listado
-    #$usersCD = New-Object System.Collections.Generic.List[string]     
+    $count = 0;   
     $currentIP = $inicio
 #endregion
 
@@ -73,9 +71,8 @@ while ($currentIP.Address -le $fin.Address) {
         if ($Session.State -eq 'Opened') {           
             #region ParteModificable
             $newusertoadd = Invoke-Command -Session $Session -ScriptBlock {
-                #net user Cubilla 1234qwer* /add /expires:never /passwordchg:no
                 param($x, $y) 
-                net user $x $y /add /expires:never
+                net user $x $y /add /expires:never #/passwordchg:no
                 wmic useraccount where "Name='$x'" set PasswordExpires=False
                 net localgroup Administrators $x /add
             } -ArgumentList $newUser, $passNewuser
@@ -96,5 +93,4 @@ while ($currentIP.Address -le $fin.Address) {
     $currentIP = [System.Net.IPAddress]::new($bytes)
 }
 
-#GuardarEnArchivo $usersCD "usersCD.txt"
 Write-Host "Usuario agregado en: $count";
