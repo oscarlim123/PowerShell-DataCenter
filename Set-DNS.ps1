@@ -67,7 +67,7 @@ while ($currentIP.Address -le $fin.Address) {
                     Set-DnsClientServerAddress -InterfaceAlias "Ethernet 2" -ServerAddresses @($dnsPrimario, $dnsSecundario)
                 }
 
-                $pcToAD = Invoke-Command -Session $session -ScriptBlock $scriptConfiguracion -ArgumentList $dnsPrimario, $dnsSecundario
+                Invoke-Command -Session $session -ScriptBlock $scriptConfiguracion -ArgumentList $dnsPrimario, $dnsSecundario
                 Write-Host "$currentIP"
             #endregion
 
