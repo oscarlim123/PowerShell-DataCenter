@@ -62,26 +62,26 @@ param(
 
 while ($currentIP.Address -le $fin.Address) {
     try {
-        $Session = New-PSSession -ComputerName $currentIP -Credential $Credential
+        $session = New-PSSession -ComputerName $currentIP -Credential $Credential
 
-        if ($Session.State -eq 'Opened') {           
+        if ($session.State -eq 'Opened') {           
             #region ParteModificable
-                $newusertoadd = Invoke-Command -Session $Session -ScriptBlock {
+                $newUserToCheck = Invoke-Command -Session $session -ScriptBlock {
                     param($x)
                     net user $x                
                 } -ArgumentList $findUser -ErrorAction SilentlyContinue
     
-                if ($null -eq $newusertoadd) {
+                if ($null -eq $newUserToCheck) {
                     $result = "El usuario $findUser no esta creado en $currentIP."
                     Write-Host $result
                     $userExist.Add($result)
                 }              
             #endregion
 
-            Remove-PSSession -Session $Session
+            Remove-PSSession -Session $session
             $count++;
         } else {
-            Write-Host "No se pudo establecer la sesión remota. Estado de la sesión: $($Session.State)"
+            Write-Host "No se pudo establecer la sesión remota. Estado de la sesión: $($session.State)"
         }
     }
     catch {
