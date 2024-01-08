@@ -1,8 +1,16 @@
+# Specifies a path to one or more locations.
+Param(
+    [Parameter(Mandatory=$true)]
+    [Alias("-p")]
+    [ValidateNotNullOrEmpty()]
+    [int]$Puerto
+)
+
 # Obtén una lista de las conexiones TCP activas en un puerto determinado
 $connections = Get-NetTCPConnection
 
 # Filtra las conexiones por puerto
-$connections = $connections | Where-Object { $_.LocalPort -eq 4192 }
+$connections = $connections | Where-Object { $_.LocalPort -eq $Puerto }
 
 $result = @{}
 
