@@ -2,7 +2,7 @@
 .COMPONENT
     PowerShell 4.0
 .DESCRIPTION
-    Hace una conexión a un rango de IPs y agrega los WindowsServer 2012 a un dominio. Tpoma username y passwd de
+    Hace una conexión a un rango de IPs y agrega los WindowsServer 2012 a un dominio. Toma username y passwd de
     un fichero de passwd.txt
 .PARAMETER UserName
     Nombre de usuario con permisos de administración para hacer la conexión
@@ -56,8 +56,14 @@ param(
     #$userExist = New-Object System.Collections.Generic.List[string]     
     $currentIP = $inicio
     $passwdFile = ".\passwd.txt"
-    $username = Get-Content $passwdFile | Select-Object -First 1
-    $password = Get-Content $passwdFile | Select-Object -Last 1
+    #$username = Get-Content $passwdFile | Select-Object -First 1
+    #$password = Get-Content $passwdFile | Select-Object -Last 1
+    $passwd = Get-Content $passwdFile
+    $userName = $passwd[0]
+    $password = $passwd[1]
+
+    $dom = $userName.Split('\') | Select-Object -First 1
+
 #endregion
 
 while ($currentIP.Address -le $fin.Address) {
@@ -66,12 +72,12 @@ while ($currentIP.Address -le $fin.Address) {
 
         if ($session.State -eq 'Opened') {           
             #region ParteModificable                
-                $block1 = {Test-Connection -ComputerName "cd.bpa.cu" -Count 3}
+                $block1 = {Test-Connection -ComputerName $dom -Count 3}
 
                 $block2 = {
                     $securePassword = ConvertTo-SecureString $using:password -AsPlainText -Force
                     $cred = New-Object System.Management.Automation.PSCredential($using:username,$securePassword)
-                    Add-Computer -ComputerName $env:COMPUTERNAME -DomainName "cd.bpa.cu" -Credential $cred -Restart -Force
+                    Add-Computer -ComputerName $env:COMPUTERNAME -DomainName $dom -Credential $cred -Restart -Force
                     #Add-Computer -ComputerName $env:COMPUTERNAME -DomainName "cd.bpa.cu" -Credential cd.bpa.cu\oscar -Restart -Force
                 }
 
