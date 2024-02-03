@@ -71,14 +71,23 @@ while ($currentIP.Address -le $fin.Address) {
         $session = New-PSSession -ComputerName $currentIP -Credential $Credential
 
         if ($session.State -eq 'Opened') {           
-            #region ParteModificable                
+            #region ParteModificable    
+                $pcData = @{
+                    DomainName = $dom
+                    Credential = $Credential
+                    Restart = $true
+                    Force = $true
+                    PassThru = $true
+                    ErrorAction = 'Stop'
+                    WarningAction = 'SilentlyContinue'
+                }
+
                 $block1 = {Test-Connection -ComputerName $dom -Count 3}
 
                 $block2 = {
                     $securePassword = ConvertTo-SecureString $using:password -AsPlainText -Force
                     $cred = New-Object System.Management.Automation.PSCredential($using:username,$securePassword)
                     Add-Computer -ComputerName $env:COMPUTERNAME -DomainName $dom -Credential $cred -Restart -Force
-                    #Add-Computer -ComputerName $env:COMPUTERNAME -DomainName "cd.bpa.cu" -Credential cd.bpa.cu\oscar -Restart -Force
                 }
 
                 Invoke-Command -Session $session -ScriptBlock $block1
