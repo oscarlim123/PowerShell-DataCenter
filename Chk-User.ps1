@@ -69,7 +69,7 @@ while ($currentIP.Address -le $fin.Address) {
                 $newUserToCheck = Invoke-Command -Session $session -ScriptBlock {
                     param($x)
                     net user $x                
-                } -ArgumentList $findUser -ErrorAction SilentlyContinue
+                } -ArgumentList @($findUser) -ErrorAction SilentlyContinue
     
                 if ($null -eq $newUserToCheck) {
                     $result = "El usuario $findUser no esta creado en $currentIP."
